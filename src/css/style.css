@@ -1,0 +1,53 @@
+.main-block {
+display: flex;
+justify-content: center;
+}
+
+.main-block__table {
+    display: none;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    border-collapse: collapse;
+}
+
+.main-block__table.active {
+    display: block;
+}
+
+.main-block__table td, .main-block__table th {
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
+}
+
+.main-block__table tr:nth-child(even){background-color: #f2f2f2;}
+
+.main-block__table tr:hover {background-color: #ddd;}
+
+.main-block__table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+}
+
+.string { 
+    color: green; 
+}
+
+.number { 
+    color: darkorange; 
+}
+
+.boolean { 
+    color: blue;
+}
+
+.null {
+   color: magenta;
+}
+.key {
+   color: red; 
+}
