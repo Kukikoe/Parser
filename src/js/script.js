@@ -37,9 +37,12 @@ function createRequest(url) {
 	xhr.responseType = 'json';
 	xhr.open('GET', url, true);
 
-	xhr.onload = function() {
-		console.log(this.status)
+	xhr.onload = function() { 
 		let jsonResponse = this.response;
+		if (jsonResponse.error) {
+			alert(jsonResponse.error.statusCode + ": " + jsonResponse.error.statusText);
+			return;
+		}
 		if (url === 'http://localhost:8099/tradingSessions') {
 			getTradingSession(jsonResponse);
 		} 

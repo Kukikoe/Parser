@@ -1,43 +1,59 @@
-const http = require('http');
 const express = require('express');
 const fs = require('fs');
-
 const app = express();
 
-let counter = 0;
-let content;
+let jsonData;
+let securitySettingsObj = {};		
+retrieveJSON();
 
 app.get("/securitySettings", function(request, response) {
-	response.setHeader("Access-Control-Allow-Origin", '*'); 
-	const data = retrieveJSON((function (err, content) {
-		let obj = JSON.parse(content);
-		response.send(obj.content.securitySettings);
-	}));
+	if (response.statusCode === 200) {
+		response.writeHead(200, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+		let securitySettings = jsonData.content.securitySettings;
+		response.end(JSON.stringify(addFieldsFromSecuritySettings(securitySettings)));
+	} else {
+		if (response.statusCode === 400) {
+			response.writeHead(400, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Bad Request'} }));
+		}
+		if (response.statusCode === 500) { 
+			response.writeHead(500, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Internal Server Error'} }));
+		}
+	}
 });
 
 app.get("/tradingSessions", function(request, response) {
-	response.setHeader("Access-Control-Allow-Origin", '*');    
-	const data = retrieveJSON((function (err, content) {
-		let obj = JSON.parse(content);
-		response.send(obj.content.tradingSessions);
-	}));
+	if (response.statusCode === 200) {
+		response.writeHead(200, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});  
+		response.end(JSON.stringify(jsonData.content.tradingSessions));
+	} else {
+		if (response.statusCode === 400) {
+			response.writeHead(400, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Bad Request'} }));
+		}
+		if (response.statusCode === 500) { 
+			response.writeHead(500, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Internal Server Error'} }));
+		}
+	}
 });
 
 app.get("/allJson", function(request, response) {
-	response.setHeader("Access-Control-Allow-Origin", '*');    
-	const data = retrieveJSON((function (err, content) {
-		let obj = JSON.parse(content);
-		response.send(obj);
-	}));
+	if (response.statusCode === 200) {
+		response.writeHead(200, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});  
+		response.end(JSON.stringify(jsonData));
+	} else {
+		if (response.statusCode === 400) {
+			response.writeHead(400, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Bad Request'} }));
+		}
+		if (response.statusCode === 500) { 
+			response.writeHead(500, {'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"});
+			response.end(JSON.stringify({error : {statusCode: response.statusCode, statusText: 'Internal Server Error'} }));
+		}
+	}
 });
-
-function sendStatus(res) {
-	res.status(200).send('OK');
-	res.status(400).send('Bad Request');
-	res.status(404).send('Not Found');
-	res.status(500).send('Internal Server Error');
-}
-
 
 function retrieveJSON(callback) {
 	return fs.readFile('responseFile.json', function(err, data) {
@@ -46,9 +62,41 @@ function retrieveJSON(callback) {
 			console.log(err.stack);
 			return;
 		}
-		callback(null, data);
+		jsonData = JSON.parse(data);
+		if (callback) {
+			callback(data);
+		}
 		console.log('File read');
 	});
+}
+
+function addFieldsFromSecuritySettings(securitySettings) {
+	if (Object.keys(securitySettingsObj).length) {
+		return securitySettingsObj;
+	}
+
+	let countInner = 10;
+	let arrayKeys = [];
+	let securitySettingsArray = [];
+	for (let key in securitySettings) {
+		arrayKeys.push(key);
+		securitySettingsArray.push(securitySettings[key]);
+	}
+
+	for (let i = 0; i < 10; i++) {
+		securitySettingsObj[arrayKeys[i]] = securitySettingsArray[i];	
+		if (i === 9) {
+			let myInterval = setInterval(() => {
+				securitySettingsObj[arrayKeys[countInner]] = securitySettingsArray[countInner];
+				countInner++;
+
+				if (countInner === securitySettingsArray.length + 1) {
+					clearInterval(myInterval);
+				}
+			}, 5000);
+		}
+	}
+	return securitySettingsObj;
 }
 
 app.listen(8099);
